@@ -16,10 +16,11 @@ shinyServer(function (input, output, session) {
 #       selectInput("y", "Dependent variable: ", dependent_variables())
 #     })
     
+  snu_coef <- reactive(snu_model(input$x, input$y, dat = snu))
+  
   output$coefplot <- renderPlot({
-    snu_coefplot(
-      snu_model(input$x, input$y, dat = snu)
-    )
+    snu_coefplot(snu_coef())
+#     text(0.5, 0.5, snu_coef)
   })
 #   })
   
