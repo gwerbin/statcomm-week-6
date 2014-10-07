@@ -1,3 +1,4 @@
+library(ggplot2)
 
 snu <- read.csv("SNU.csv", sep = ",", na.strings = TRUE, stringsAsFactors = FALSE)
 
@@ -29,7 +30,7 @@ scale_2sd <- function (x, center = FALSE, scale = TRUE) {
   x
 }
 
-snu_model <- function (x, y, dat = snu) {
+snu_model <- function (x, y, dat = snu, sort_by) {
   out <- t(sapply(unique(dat$country), function(country) {
     dat <- dat[dat$country == country, ]
     y <- scale_2sd(dat[[y]])
@@ -39,7 +40,17 @@ snu_model <- function (x, y, dat = snu) {
   }))
   colnames(out) <- c("coef", "X2.5", "X97.5", "X25", "X75", "N")
   out <- cbind(country = rownames(out), as.data.frame(out))
-  out$country <- as.factor(paste(out$country, out$N, sep = "\nN = "))
+  out$diff95 <- out$X97.5 - out$X2.5
+  
+  if(missing(sort_by)) {
+    out$country <- factor(out$country, out$country)
+    levels(out$country) <- paste(levels(out$country), out$N, sep = "\nN = ")
+  } else {
+    sort_by <- order(out[, sort_by])
+    out$country <- factor(out$country, out$country[sort_by])
+    levels(out$country) <- paste(levels(out$country), out$N[sort_by], sep = "\nN = ")
+  }
+  
   structure(out, x = x, y = y)
 }
 
@@ -58,7 +69,7 @@ snu_coefplot <- function(snu_coefs) {
 # rm(list=ls())
 # x <- regression_variables[5]
 # y <- regression_variables[4]
-# snu_coefs <- snu_model(x, y)
+# snu_coefs <- snu_model(x, y, sort_by = "diff95")
 # snu_coefplot(snu_coefs)
 
 # save.image(file = "snu.RData")

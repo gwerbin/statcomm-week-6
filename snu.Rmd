@@ -8,8 +8,90 @@ output:
 runtime: shiny
 ---
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.height = 8}
 source("SNU.R")
 
+x <- regression_variables[5]
+y <- regression_variables[4]
+snu_coefs <- snu_model(x, y)
+snu_coefplot(snu_coefs)
+```
 
+We plan to build a dashboard around this basic plot. The alpha version is in the attached .zip file. These are the features we plan to add by Thursday:
+
+*  sorting by an arbitrary country-level variable, e.g. by the coefficients themselves, or by N
+*  a switch for comparing the regressions with and without capital cities
+*  reactive input so that if you select an X, you can't select the same variable for Y
+*  filters and/or hilighting of countries, e.g. to point out which countries have unicameral legislatures, or to plot only countries that exhibit variation in their upper house membership
+*  a readable title
+*  a caption that actually explains what's on the plot
+
+For example, what the plot might look like when sorted by the coefficients:
+
+```{r, echo = FALSE, fig.height = 8}
+snu_model <- function (x, y, dat = snu) {
+  out <- t(sapply(unique(dat$country), function(country) {
+    dat <- dat[dat$country == country, ]
+    y <- scale_2sd(dat[[y]])
+    x <- scale_2sd(dat[[x]], center = TRUE)
+    fit <- lm(y ~ x)
+    c(fit$coef[2], confint(fit, 2, .95), confint(fit, 2, .5), length(x))
+  }))
+  colnames(out) <- c("coef", "X2.5", "X97.5", "X25", "X75", "N")
+  out <- cbind(country = rownames(out), as.data.frame(out))
+  out$country <- factor(out$country, out[order(out$coef), "country"])
+  levels(out$country) <- paste(levels(out$country), out$N[order(out$coef)], sep = "\nN = ")
+  structure(out, x = x, y = y)
+}
+
+snu_coefplot <- function(snu_coefs) {
+  ggplot(snu_coefs) + geom_point(aes(x = coef, y = country), size = 3) +
+    geom_segment(aes(x = X2.5, xend = X97.5, y = as.numeric(country), yend = as.numeric(country))) +
+    geom_segment(aes(x = X25, xend = X75, y = as.numeric(country), yend = as.numeric(country)), size = 1.5) +
+    geom_hline(aes(yintercept = as.numeric(country)),  linetype = "dotted") +
+    ggtitle(sprintf("Coefficients of %s\nvs. %s", attr(snu_coefs, "y"), attr(snu_coefs, "x"))) +
+    theme_classic() + theme(
+      legend.position = "none"
+    )
+}
+
+x <- regression_variables[5]
+y <- regression_variables[4]
+snu_coefs <- snu_model(x, y)
+snu_coefplot(snu_coefs)
+```
+
+or sorted by N:
+
+```{r, echo = FALSE, fig.height = 8}
+snu_model <- function (x, y, dat = snu) {
+  out <- t(sapply(unique(dat$country), function(country) {
+    dat <- dat[dat$country == country, ]
+    y <- scale_2sd(dat[[y]])
+    x <- scale_2sd(dat[[x]], center = TRUE)
+    fit <- lm(y ~ x)
+    c(fit$coef[2], confint(fit, 2, .95), confint(fit, 2, .5), length(x))
+  }))
+  colnames(out) <- c("coef", "X2.5", "X97.5", "X25", "X75", "N")
+  out <- cbind(country = rownames(out), as.data.frame(out))
+  out$country <- factor(out$country, out[order(out$N), "country"])
+  levels(out$country) <- paste(levels(out$country), out$N[order(out$N)], sep = "\nN = ")
+  structure(out, x = x, y = y)
+}
+
+snu_coefplot <- function(snu_coefs) {
+  ggplot(snu_coefs) + geom_point(aes(x = coef, y = country), size = 3) +
+    geom_segment(aes(x = X2.5, xend = X97.5, y = as.numeric(country), yend = as.numeric(country))) +
+    geom_segment(aes(x = X25, xend = X75, y = as.numeric(country), yend = as.numeric(country)), size = 1.5) +
+    geom_hline(aes(yintercept = as.numeric(country)),  linetype = "dotted") +
+    ggtitle(sprintf("Coefficients of %s\nvs. %s", attr(snu_coefs, "y"), attr(snu_coefs, "x"))) +
+    theme_classic() + theme(
+      legend.position = "none"
+    )
+}
+
+x <- regression_variables[5]
+y <- regression_variables[4]
+snu_coefs <- snu_model(x, y)
+snu_coefplot(snu_coefs)
 ```
