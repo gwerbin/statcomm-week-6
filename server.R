@@ -1,11 +1,25 @@
 library(shiny)
 
-load("snu.RData")
+source("SNU.R")
 
-shinyServer(function(input,output,session) { 
+# shiny server ----
 
-  output$coefplot <- snu_coefplot(
-    snu_model(input$x, input$y, dat = snu)
-  )
+shinyServer(function (input, output, session) { 
+  
+#   observe({
+#     dependent_variables <- reactive({
+#       regression_variables[regression_variables != input$x]
+#     })
+#     
+#     output$y <- renderUI({
+#       selectInput("y", "Dependent variable: ", dependent_variables())
+#     })
+    
+  output$coefplot <- renderPlot({
+    snu_coefplot(
+      snu_model(input$x, input$y, dat = snu)
+    )
+  })
+#   })
   
 })

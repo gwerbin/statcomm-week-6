@@ -18,8 +18,6 @@ for (variable in percap_variables) {
 
 regression_variables <- c(paste0(percap_variables, ".percap"), "district.population")
 
-save(snu, file = "snu.RData")
-
 #' filters/highlights:
 #' - unicameral?
 #' - land area
@@ -45,11 +43,6 @@ snu_model <- function (x, y, dat = snu) {
   out
 }
 
-# remember to change the arguments
-x <- regression_variables[5]
-y <- regression_variables[4]
-snu_coefs <- snu_model(x, y)
-
 snu_coefplot <- function(snu_coefs) {
   ggplot(snu_coefs) + geom_point(aes(x = coef, y = country), size = 3) +
     geom_segment(aes(x = X2.5, xend = X97.5, y = as.numeric(country), yend = as.numeric(country))) +
@@ -60,3 +53,13 @@ snu_coefplot <- function(snu_coefs) {
       legend.position = "none"
     )
 }
+
+## for debugging/testing:
+# rm(list=ls())
+# x <- regression_variables[5]
+# y <- regression_variables[4]
+# snu_coefs <- snu_model(x, y)
+# snu_coefplot(snu_coefs)
+
+# save.image(file = "snu.RData")
+
