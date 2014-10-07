@@ -1,6 +1,6 @@
 ---
 title: "Untitled"
-author: "Greg Werbin"
+author: "Greg Werbin & Huei-Chung Huang"
 date: "October 6, 2014"
 output:
   html_document:
