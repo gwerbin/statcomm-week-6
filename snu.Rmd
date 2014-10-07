@@ -9,5 +9,7 @@ runtime: shiny
 ---
 
 ```{r, echo=FALSE}
-shinyAppDir(".", options = list(height = "600px"))
+source("SNU.R")
+
+
 ```

@@ -1,5 +1,5 @@
 
-snu <- read.csv("SNU.csv", sep = ",", na.strings = TRUE)
+snu <- read.csv("SNU.csv", sep = ",", na.strings = TRUE, stringsAsFactors = FALSE)
 
 names(snu) <- tolower(names(snu))
 
@@ -40,7 +40,7 @@ snu_model <- function (x, y, dat = snu) {
   colnames(out) <- c("coef", "X2.5", "X97.5", "X25", "X75", "N")
   out <- cbind(country = rownames(out), as.data.frame(out))
   out$country <- as.factor(paste(out$country, out$N, sep = "\nN = "))
-  out
+  structure(out, x = x, y = y)
 }
 
 snu_coefplot <- function(snu_coefs) {
@@ -48,7 +48,7 @@ snu_coefplot <- function(snu_coefs) {
     geom_segment(aes(x = X2.5, xend = X97.5, y = as.numeric(country), yend = as.numeric(country))) +
     geom_segment(aes(x = X25, xend = X75, y = as.numeric(country), yend = as.numeric(country)), size = 1.5) +
     geom_hline(aes(yintercept = as.numeric(country)),  linetype = "dotted") +
-    ggtitle(sprintf("Coefficients of %s vs. %s", y, x)) +
+    ggtitle(sprintf("Coefficients of %s\nvs. %s", attr(snu_coefs, "y"), attr(snu_coefs, "x"))) +
     theme_classic() + theme(
       legend.position = "none"
     )
