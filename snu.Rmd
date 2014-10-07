@@ -1,0 +1,13 @@
+---
+title: "Untitled"
+author: "Greg Werbin"
+date: "October 6, 2014"
+output:
+  html_document:
+    keep_md: yes
+runtime: shiny
+---
+
+```{r, echo=FALSE}
+shinyAppDir(".", options = list(height = "600px"))
+```
