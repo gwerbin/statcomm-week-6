@@ -45,12 +45,15 @@ snu_model <- function (x, y, dat = snu) {
 }
 
 # remember to change the arguments
-snu_coefs <- snu_model(regression_variables[5], regression_variables[4])
+x <- regression_variables[5]
+y <- regression_variables[4]
+snu_coefs <- snu_model(x, y)
 
 ggplot(snu_coefs) + geom_point(aes(x = coef, y = country), size = 3) +
   geom_segment(aes(x = X2.5, xend = X97.5, y = as.numeric(country), yend = as.numeric(country))) +
   geom_segment(aes(x = X25, xend = X75, y = as.numeric(country), yend = as.numeric(country)), size = 1.5) +
   geom_hline(aes(yintercept = as.numeric(country)),  linetype = "dotted") +
+  ggtitle(sprintf("Coefficients of %s vs. %s", y, x))
   theme_classic() + theme(
     legend.position = "none"
   )
