@@ -17,7 +17,11 @@ for (variable in percap_variables) {
   snu[, sprintf("%s.percap", variable)] <- snu[, variable] / snu[, "district.population"]
 }
 
-regression_variables <- c(paste0(percap_variables, ".percap"), "district.population")
+regression_variables <- c(
+  percap_variables,
+  paste0(percap_variables, ".percap"),
+  "district.population"
+)
 
 #' filters/highlights:
 #' - unicameral?
@@ -30,46 +34,66 @@ scale_2sd <- function (x, center = FALSE, scale = TRUE) {
   x
 }
 
-snu_model <- function (x, y, dat = snu, sort_by) {
-  out <- t(sapply(unique(dat$country), function(country) {
-    dat <- dat[dat$country == country, ]
-    y <- scale_2sd(dat[[y]])
-    x <- scale_2sd(dat[[x]], center = TRUE)
-    fit <- lm(y ~ x)
-    c(fit$coef[2], confint(fit, 2, .95), confint(fit, 2, .5), length(x))
-  }))
-  colnames(out) <- c("coef", "X2.5", "X97.5", "X25", "X75", "N")
-  out <- cbind(country = rownames(out), as.data.frame(out))
-  out$diff95 <- out$X97.5 - out$X2.5
-  
-  if(missing(sort_by)) {
-    out$country <- factor(out$country, out$country)
-    levels(out$country) <- paste(levels(out$country), out$N, sep = "\nN = ")
+all_missing_or_same <- function (x) {
+  all(is.na(x)) ||
+    all(sapply(x[-1], FUN=function(z) identical(z, x[1]) ))
+}
+
+snu_model <- function(country, x, y, dat = snu) {
+  dat <- dat[dat$country == country, ]
+  y <- scale_2sd(dat[[y]])
+  x <- scale_2sd(dat[[x]], center = TRUE)
+
+  if (all_missing_or_same(x) || all_missing_or_same(y)) {
+    out <- rep(NA, 6)
   } else {
-    sort_by <- order(out[, sort_by])
-    out$country <- factor(out$country, out$country[sort_by])
-    levels(out$country) <- paste(levels(out$country), out$N[sort_by], sep = "\nN = ")
+    fit <- lm(y ~ x)
+    out <- c(fit$coef[2], confint(fit, 2, .95), confint(fit, 2, .5), length(x))
   }
   
+  names(out) <-  c("coef", "X2.5", "X97.5", "X25", "X75", "N")
+  out
+}
+
+nice_names <- function(ugly, choices = regression_variables) {
+  subs <- matrix(c(
+    TRUE, ".", " ",
+    FALSE, "^.", ""
+  ), ncol = 3, byrow = TRUE)
+  nice <- apply(subs, 1, function(a) gsub(a[2], a[3], ugly, fixed = a[1]))
+}
+
+snu_fit <- function (x, y, dat = snu) {
+  out <- as.data.frame(t(sapply(unique(dat$country), snu_model, x = x, y = y)))
+  out$country <- row.names(out)
+  out$country <- factor(out$country, out$country,
+                        paste(out$country, out$N, sep = "\nN = "))
   structure(out, x = x, y = y)
 }
 
 snu_coefplot <- function(snu_coefs) {
-  ggplot(snu_coefs) + geom_point(aes(x = coef, y = country), size = 3) +
+  g <- ggplot(snu_coefs) + geom_point(aes(x = coef, y = country), size = 3) +
     geom_segment(aes(x = X2.5, xend = X97.5, y = as.numeric(country), yend = as.numeric(country))) +
     geom_segment(aes(x = X25, xend = X75, y = as.numeric(country), yend = as.numeric(country)), size = 1.5) +
     geom_hline(aes(yintercept = as.numeric(country)),  linetype = "dotted") +
-    ggtitle(sprintf("Coefficients of %s\nvs. %s", attr(snu_coefs, "y"), attr(snu_coefs, "x"))) +
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    xlab("Slope coefficient") + ylab("Country") +
+    ggtitle(sprintf("Regression models of\n%s vs. %s", attr(snu_coefs, "y"), attr(snu_coefs, "x"))) +
     theme_classic() + theme(
       legend.position = "none"
     )
+  
+  plot(g)
+#   g$layout[which(g$layout$name == "title"), c("l", "r")] <- c(1, max(g$layout$r))
+#   plot.new()
+#   grid.draw(g)
 }
 
 ## for debugging/testing:
 # rm(list=ls())
-# x <- regression_variables[5]
-# y <- regression_variables[4]
-# snu_coefs <- snu_model(x, y, sort_by = "diff95")
+x <- 5
+y <- 6
+snu_coefs <- snu_fit(x, y)
 # snu_coefplot(snu_coefs)
 
 # save.image(file = "snu.RData")
