@@ -55,6 +55,10 @@ snu_model <- function (x, y, dat = snu, sort_by) {
 }
 
 snu_coefplot <- function(snu_coefs) {
+  if(!require(ggplot2)){
+    install.packages("ggplot2")
+    library(ggplot2)
+  }
   ggplot(snu_coefs) + geom_point(aes(x = coef, y = country), size = 3) +
     geom_segment(aes(x = X2.5, xend = X97.5, y = as.numeric(country), yend = as.numeric(country))) +
     geom_segment(aes(x = X25, xend = X75, y = as.numeric(country), yend = as.numeric(country)), size = 1.5) +
