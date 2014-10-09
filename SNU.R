@@ -1,10 +1,19 @@
 library(ggplot2)
 
 snu <- read.csv("SNU.csv", sep = ",", na.strings = TRUE, stringsAsFactors = FALSE)
-
 names(snu) <- tolower(names(snu))
 
 snu$unicameral <- is.na(snu$unicameral)
+
+cap_first <- function(x) sapply(x, function(x) {
+  substr(x, 1, 1) <- toupper(substr(x, 1, 1))
+  x
+}, USE.NAMES = FALSE)
+
+snu$country <- unlist(lapply(
+  lapply(strsplit(tolower(snu$country), " "), cap_first),
+  function(x) paste(sub("^Us", "US", x), collapse = " ")
+))
 
 percap_variables <- c(
   "lower.chamber.seats",
@@ -24,7 +33,6 @@ regression_variables <- sort(c(
 ))
 
 nice_names <- function(x) gsub("gdp", "GDP", gsub("\\.", " ", x))
-# cap_first <- function(x) substr(x, 1, 1) <- toupper(substr(x, 1, 1))
 
 names(snu)[names(snu) %in% regression_variables] <-
   sapply(regression_variables, nice_names, USE.NAMES = FALSE)
@@ -35,7 +43,7 @@ regression_variables <- sapply(regression_variables, nice_names, USE.NAMES = FAL
 #' - land area
 #' - compare with/without capitals
 #' - sort
-sortby_variables <- c("Coefficient", "N", "Alphabetical")
+sortby_variables <- c("Coefficient", "Number of observations", "Country name")
 
 
 scale_2sd <- function (x, center = FALSE, scale = TRUE) {
@@ -67,9 +75,13 @@ snu_model <- function(country, x, y, dat = snu) {
 
 snu_fit <- function (x, y, dat = snu) {
   out <- as.data.frame(t(sapply(unique(dat$country), snu_model, x = x, y = y, dat = dat)))
+  
   out$country <- row.names(out)
-  out$country <- factor(out$country, out$country,
-                        sprintf("%s \n(N = %s)", out$country, out$N))
+  out$country <- factor(
+    out$country, out$country,
+    sprintf("%s \n(N = %s)", out$country, out$N), ordered = TRUE
+  )
+  
   structure(out, x = x, y = y)
 }
 

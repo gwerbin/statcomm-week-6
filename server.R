@@ -11,18 +11,22 @@ shinyServer(function (input, output, session) {
     updateSelectInput(session, "y",
                       choices = regression_variables[regression_variables != input$x]
     )})
-    
-  #snu_coef <- reactive(snu_fit(input$x, input$y, dat = snu))
   
-  output$coefplot <- renderPlot({
-#      snu_coefplot(output$snu_coef <- snu_coef())
-#      text(0.5, 0.5, paste(input$x, " ", input$y))
-#      text(0.2, 0.2, snu_fit(input$x, input$y))
-#      snu_coefplot(snu_fit(input$x, input$y))
-    if(input$withCap == TRUE) {snu_coefplot(snu_fit(input$x, input$y, dat = snu))}
-    else {snu_coefplot(snu_fit(input$x, input$y, dat = snu[snu$capital!=1,]))}
-
- #   text(0.5, 0.5, paste(input$withCap, "", input$x, "", input$sortby))
+  sortBy <- reactive({switch(input$sortBy,
+    "Coefficient"             = expression( order(out$coef, decreasing = input$revSort) ),
+    "Number of observations"  = expression( order(out$N, decreasing = input$revSort) ),
+    "Country name"            = expression( order(row.names(out), decreasing = input$revSort) )
+  )})
+  
+  snu_coef <- reactive({
+    if (input$withCap) out <- snu_fit(input$x, input$y, dat = snu)
+    else out <- snu_fit(input$x, input$y, dat = snu[snu$capital!=1,])
+    
+    out$country <- factor(out$country, levels(out$country)[eval( sortBy() )] )
+    
+    out
   })
+  
+  output$coefplot <- renderPlot( snu_coefplot(snu_coef()) )
   
 })
