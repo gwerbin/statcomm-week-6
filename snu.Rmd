@@ -11,9 +11,10 @@ output:
 source("SNU.R")
 
 x <- regression_variables[5]
-y <- regression_variables[4]
-snu_coefs <- snu_model(x, y)
+y <- regression_variables[7]
+snu_coefs <- snu_fit(x, y)
 snu_coefplot(snu_coefs)
+
 ```
 
 We plan to build a dashboard around this basic plot. The alpha version is in the attached .zip file. These are the features we plan to add by Thursday:

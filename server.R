@@ -7,21 +7,16 @@ source("SNU.R")
 
 shinyServer(function (input, output, session) { 
   
-#   observe({
-#     dependent_variables <- reactive({
-#       regression_variables[regression_variables != input$x]
-#     })
-#     
-#     output$y <- renderUI({
-#       selectInput("y", "Dependent variable: ", dependent_variables())
-#     })
+  observe({
+    updateSelectInput(session, "y",
+                      choices = regression_variables[regression_variables != input$x]
+    )})
     
-  snu_coef <- reactive(snu_model(input$x, input$y, dat = snu))
+  snu_coef <- reactive(snu_fit(input$x, input$y, dat = snu))
   
   output$coefplot <- renderPlot({
-    snu_coefplot(snu_coef())
+    snu_coefplot(output$snu_coef <- snu_coef())
 #     text(0.5, 0.5, snu_coef)
   })
-#   })
   
 })
