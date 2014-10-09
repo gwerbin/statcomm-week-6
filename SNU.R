@@ -14,14 +14,21 @@ percap_variables <- c(
 )
 
 for (variable in percap_variables) {
-  snu[, sprintf("%s.percap", variable)] <- snu[, variable] / snu[, "district.population"]
+  snu[, sprintf("%s.per.capita", variable)] <- snu[, variable] / snu[, "district.population"]
 }
 
-regression_variables <- c(
+regression_variables <- sort(c(
   percap_variables,
-  paste0(percap_variables, ".percap"),
+  paste0(percap_variables, ".per.capita"),
   "district.population"
-)
+))
+
+nice_names <- function(x) gsub("gdp", "GDP", gsub("\\.", " ", x))
+# cap_first <- function(x) substr(x, 1, 1) <- toupper(substr(x, 1, 1))
+
+names(snu)[names(snu) %in% regression_variables] <-
+  sapply(regression_variables, nice_names, USE.NAMES = FALSE)
+regression_variables <- sapply(regression_variables, nice_names, USE.NAMES = FALSE)
 
 #' filters/highlights:
 #' - unicameral?
@@ -55,19 +62,11 @@ snu_model <- function(country, x, y, dat = snu) {
   out
 }
 
-nice_names <- function(ugly, choices = regression_variables) {
-  subs <- matrix(c(
-    TRUE, ".", " ",
-    FALSE, "^.", ""
-  ), ncol = 3, byrow = TRUE)
-  nice <- apply(subs, 1, function(a) gsub(a[2], a[3], ugly, fixed = a[1]))
-}
-
 snu_fit <- function (x, y, dat = snu) {
   out <- as.data.frame(t(sapply(unique(dat$country), snu_model, x = x, y = y)))
   out$country <- row.names(out)
   out$country <- factor(out$country, out$country,
-                        paste(out$country, out$N, sep = "\nN = "))
+                        sprintf("%s \n(N = %s)", out$country, out$N))
   structure(out, x = x, y = y)
 }
 
@@ -91,9 +90,9 @@ snu_coefplot <- function(snu_coefs) {
 
 ## for debugging/testing:
 # rm(list=ls())
-x <- 5
-y <- 6
-snu_coefs <- snu_fit(x, y)
+# x <- 5
+# y <- 6
+# snu_coefs <- snu_fit(x, y)
 # snu_coefplot(snu_coefs)
 
 # save.image(file = "snu.RData")

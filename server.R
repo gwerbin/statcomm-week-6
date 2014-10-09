@@ -15,7 +15,7 @@ shinyServer(function (input, output, session) {
   snu_coef <- reactive(snu_fit(input$x, input$y, dat = snu))
   
   output$coefplot <- renderPlot({
-    snu_coefplot(snu_coef())
+    snu_coefplot(output$snu_coef <- snu_coef())
 #     text(0.5, 0.5, snu_coef)
   })
   
