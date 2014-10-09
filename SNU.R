@@ -34,6 +34,9 @@ regression_variables <- sapply(regression_variables, nice_names, USE.NAMES = FAL
 #' - unicameral?
 #' - land area
 #' - compare with/without capitals
+#' - sort
+sortby_variables <- c("coef", "N", "country")
+
 
 scale_2sd <- function (x, center = FALSE, scale = TRUE) {
   if (center) x <- x - mean(x, na.rm = TRUE)
@@ -76,7 +79,7 @@ snu_coefplot <- function(snu_coefs) {
     library(ggplot2)
   }
   # ggplot(snu_coefs) + geom_point(aes(x = coef, y = country), size = 3) +
-  g <- ggplot(snu_coefs) + geom_point(aes(x = coef, y = country), size = 3) +
+  g <- ggplot(snu_coefs) + geom_point(aes(x = coef, y = country, size = 3)) +
     geom_segment(aes(x = X2.5, xend = X97.5, y = as.numeric(country), yend = as.numeric(country))) +
     geom_segment(aes(x = X25, xend = X75, y = as.numeric(country), yend = as.numeric(country)), size = 1.5) +
     geom_hline(aes(yintercept = as.numeric(country)),  linetype = "dotted") +

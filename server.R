@@ -18,7 +18,10 @@ shinyServer(function (input, output, session) {
 #     snu_coefplot(output$snu_coef <- snu_coef())
 #      text(0.5, 0.5, paste(input$x, " ", input$y))
 #      text(0.2, 0.2, snu_fit(input$x, input$y))
-    snu_coefplot(snu_fit(input$x, input$y))
+#    snu_coefplot(snu_fit(input$x, input$y))
+    if(input$withCap == TRUE) snu_coefplot(snu_fit(input$x, input$y, dat = snu[snu$capital!=1,]))
+    else snu_coefplot(snu_fit(input$x, input$y, dat = snu))
+    #text(0.5, 0.5, paste(input$withCap, "", input$x, "", input$sortby))
   })
   
 })
