@@ -12,12 +12,6 @@ shinyServer(function (input, output, session) {
                       choices = regression_variables[regression_variables != input$x]
     )})
   
-  sortBy <- reactive({switch(input$sortBy,
-    "Coefficient"             = expression( order(out$coef, decreasing = input$revSort) ),
-    "Number of observations"  = expression( order(out$N, decreasing = input$revSort) ),
-    "Country name"            = expression( order(row.names(out), decreasing = input$revSort) )
-  )})
-  
   snu_coef <- reactive({
     if (input$withCap) out <- snu_fit(input$x, input$y, dat = snu)
     else out <- snu_fit(input$x, input$y, dat = snu[snu$capital!=1,])
