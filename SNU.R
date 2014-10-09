@@ -3,7 +3,7 @@ if(!require(ggplot2)){
   library(ggplot2)
 }
 
-snu <- read.csv("./snu.csv", sep = ",", na.strings = TRUE, stringsAsFactors = FALSE)
+snu <- read.csv("SNU.csv", sep = ",", na.strings = TRUE, stringsAsFactors = FALSE)
 names(snu) <- tolower(names(snu))
 
 snu$unicameral <- is.na(snu$unicameral)

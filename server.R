@@ -1,7 +1,7 @@
 library(shiny)
 library(ggplot2)
 
-source("./SNU.R")
+source("SNU.R")
 
 # shiny server ----
 
@@ -22,13 +22,7 @@ shinyServer(function (input, output, session) {
     if (input$withCap) out <- snu_fit(input$x, input$y, dat = snu)
     else out <- snu_fit(input$x, input$y, dat = snu[snu$capital!=1,])
     
-    sortBy <- switch(input$sortBy,
-           "Coefficient"             = order(out$coef, decreasing = input$revSort),
-           "Number of observations"  = order(out$N, decreasing = input$revSort),
-           "Country name"            = order(row.names(out), decreasing = input$revSort)
-    )
-    
-    out$country <- factor(out$country, levels(out$country)[sortBy])
+    out$country <- factor(out$country, levels(out$country)[eval( sortBy() )] )
     
     out
   })
