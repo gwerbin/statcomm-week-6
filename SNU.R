@@ -35,7 +35,7 @@ regression_variables <- sapply(regression_variables, nice_names, USE.NAMES = FAL
 #' - land area
 #' - compare with/without capitals
 #' - sort
-sortby_variables <- c("coef", "N", "country")
+sortby_variables <- c("Coefficient", "N", "Alphabetical")
 
 
 scale_2sd <- function (x, center = FALSE, scale = TRUE) {
@@ -66,7 +66,7 @@ snu_model <- function(country, x, y, dat = snu) {
 }
 
 snu_fit <- function (x, y, dat = snu) {
-  out <- as.data.frame(t(sapply(unique(dat$country), snu_model, x = x, y = y)))
+  out <- as.data.frame(t(sapply(unique(dat$country), snu_model, x = x, y = y, dat = dat)))
   out$country <- row.names(out)
   out$country <- factor(out$country, out$country,
                         sprintf("%s \n(N = %s)", out$country, out$N))
