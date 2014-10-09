@@ -1,4 +1,7 @@
-library(ggplot2)
+if(!require(ggplot2)){
+  install.packages("ggplot2")
+  library(ggplot2)
+}
 
 snu <- read.csv("SNU.csv", sep = ",", na.strings = TRUE, stringsAsFactors = FALSE)
 names(snu) <- tolower(names(snu))
@@ -86,10 +89,6 @@ snu_fit <- function (x, y, dat = snu) {
 }
 
 snu_coefplot <- function(snu_coefs) {
-  if(!require(ggplot2)){
-    install.packages("ggplot2")
-    library(ggplot2)
-  }
   # ggplot(snu_coefs) + geom_point(aes(x = coef, y = country), size = 3) +
   g <- ggplot(snu_coefs) + geom_point(aes(x = coef, y = country, size = 3)) +
     geom_segment(aes(x = X2.5, xend = X97.5, y = as.numeric(country), yend = as.numeric(country))) +
